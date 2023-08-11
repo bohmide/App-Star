@@ -1,6 +1,8 @@
+// ignore_for_file: avoid_print, file_names
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import '../../utils/Local_Storage.dart';
 import '../../utils/Scrolling_Notif.dart';
 import '../../widgets/AppBareP.dart';
 import '../Admin/Admin_Accueil.dart';
@@ -23,6 +25,7 @@ class _HomePageState extends State<HomePage> {
   bool isVisible = true;
   Authentification_FirestoreService authFirestore =
       Authentification_FirestoreService();
+  Local_Storage localStorage = Local_Storage();
   String cin = "null1";
 
   @override
@@ -39,7 +42,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> getUserId() async {
-    cin = await authFirestore.getUserId("userId");
+    cin = await localStorage.getUserId("userId");
     setState(() {}); // Trigger UI rebuild to show the updated value
   }
 
@@ -201,7 +204,7 @@ class _HomePageState extends State<HomePage> {
               "Admin name ",
               style: TextStyle(fontSize: 24, color: Colors.white),
             ),
-            Text("cin: $cin ${cin.length}")
+            Text("cin: $cin")
           ],
         ),
       ),

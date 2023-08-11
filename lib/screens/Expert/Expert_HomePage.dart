@@ -1,6 +1,9 @@
+// ignore_for_file: avoid_print, file_names
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../utils/Local_Storage.dart';
 import '../../utils/Scrolling_Notif.dart';
 import '../../widgets/AppBareP.dart';
 import '../profile/Profile.dart';
@@ -15,16 +18,31 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  Local_Storage localStorage = Local_Storage();
+
   final PageController _pageController = PageController(initialPage: 0);
   int selectedPageIndex = 0;
   double maxHeight = 256;
   double currentHeight = 256;
   bool isVisible = true;
+  String cin = "null1";
+
+  @override
+  void initState() {
+    super.initState();
+    getUserId();
+    print("cin: $cin");
+  }
 
   @override
   void dispose() {
     _pageController.dispose();
     super.dispose();
+  }
+
+  Future<void> getUserId() async {
+    cin = await localStorage.getUserId("userId");
+    setState(() {}); // Trigger UI rebuild to show the updated value
   }
 
   Future<void> updateAppBarHeight() async {
@@ -170,21 +188,22 @@ class _HomePageState extends State<HomePage> {
       padding: const EdgeInsets.only(
         top: 16,
       ),
-      child: const Center(
+      child: Center(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Text(
+            const Text(
               "Bonjour",
               style: TextStyle(color: Colors.white),
             ),
-            SizedBox(
+            const SizedBox(
               height: 16,
             ),
-            Text(
+            const Text(
               "Expert name",
               style: TextStyle(fontSize: 24, color: Colors.white),
             ),
+            Text("cin: $cin")
           ],
         ),
       ),

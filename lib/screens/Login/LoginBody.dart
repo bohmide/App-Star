@@ -13,6 +13,7 @@ import '../../widgets/button_widget.dart';
 import '../Forg_Pwd.dart';
 import 'athentif_Expert_Client.dart';
 import '../../services/Authentification_FirestoreServicr.dart';
+import '../../utils/Local_Storage.dart';
 
 class Login extends StatefulWidget {
   const Login({super.key});
@@ -49,6 +50,10 @@ class _LoginState extends State<Login> {
   final _nameKey = GlobalKey<FormState>();
   final _lastNameKey = GlobalKey<FormState>();
   final _roleKey = GlobalKey<FormState>();
+
+  Local_Storage localStorage = Local_Storage();
+  Authentification_FirestoreService authFirestoreService =
+      Authentification_FirestoreService();
 
   @override
   void initState() {
@@ -385,9 +390,6 @@ class _LoginState extends State<Login> {
           Colors.white,
         ],
         onPressed: () async {
-          Authentification_FirestoreService authFirestoreService =
-              Authentification_FirestoreService();
-
           print('login');
           if (register) {
             //validation for register
@@ -439,7 +441,7 @@ class _LoginState extends State<Login> {
                   final userRole = await authFirestoreService
                       .getUserRole(textfieldsStrings[0]);
                   if (userRole == "S_User") {
-                    authFirestoreService.saveUserId(textfieldsStrings[0]);
+                    localStorage.saveUserId(textfieldsStrings[0]);
                     print("Client");
                     Navigator.pushReplacement(context,
                         MaterialPageRoute(builder: (context) {
@@ -449,7 +451,7 @@ class _LoginState extends State<Login> {
                       );
                     }));
                   } else if (userRole == "E_User") {
-                    authFirestoreService.saveUserId(textfieldsStrings[0]);
+                    localStorage.saveUserId(textfieldsStrings[0]);
                     print("Expert");
                     Navigator.pushReplacement(
                         context,
@@ -457,7 +459,7 @@ class _LoginState extends State<Login> {
                             builder: (context) =>
                                 const Authentif_Expert_client()));
                   } else if (userRole == "A_User") {
-                    authFirestoreService.saveUserId(textfieldsStrings[0]);
+                    localStorage.saveUserId(textfieldsStrings[0]);
                     print("Admin");
                     Navigator.pushReplacement(context,
                         MaterialPageRoute(builder: (context) {

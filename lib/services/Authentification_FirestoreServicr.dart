@@ -61,16 +61,6 @@ class Authentification_FirestoreService {
     }
   }
 
-  Future<void> saveUserId(String cin) async {
-    SharedPreferences prefer = await SharedPreferences.getInstance();
-    prefer.setString('userId', cin);
-  }
-
-  Future<String> getUserId(String cin) async {
-    SharedPreferences prefer = await SharedPreferences.getInstance();
-    return prefer.getString('userId') ?? "null";
-  }
-
   Future<bool> isUserExist(String cin) async {
     try {
       // Query the 'users' collection to find the user with the provided username.
