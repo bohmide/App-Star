@@ -1,6 +1,10 @@
-// ignore_for_file: non_constant_identifier_names, file_names, unnecessary_import
+// ignore_for_file: non_constant_identifier_names, file_names, unnecessary_import, avoid_print
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'package:star/utils/Local_Storage.dart';
+import 'package:star/widgets/Card_Notification.dart';
 
 class NotificationPage extends StatefulWidget {
   const NotificationPage({super.key});
@@ -10,6 +14,25 @@ class NotificationPage extends StatefulWidget {
 }
 
 class _NotificationPageState extends State<NotificationPage> {
+  String cin = "";
+
+  final Stream<QuerySnapshot> firestore = FirebaseFirestore.instance
+      .collection("notification")
+      .snapshots(includeMetadataChanges: true);
+
+  final Local_Storage localStorage = Local_Storage();
+  @override
+  void initState() {
+    super.initState();
+    getUserId();
+    print("cin: $cin");
+  }
+
+  Future<void> getUserId() async {
+    cin = await localStorage.getUserId("userId");
+    setState(() {}); // Trigger UI rebuild to show the updated value
+  }
+
   @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
@@ -31,7 +54,7 @@ class _NotificationPageState extends State<NotificationPage> {
       ),
       body: Padding(
         padding: const EdgeInsets.only(left: 20, right: 20, top: 10),
-        child: _ListNotification(),
+        child: _ListNotification1(),
       ),
     ));
   }
@@ -57,5 +80,41 @@ class _NotificationPageState extends State<NotificationPage> {
             );
           }),
     );
+  }
+
+  Widget _ListNotification1() {
+    return StreamBuilder<QuerySnapshot>(
+        stream: firestore,
+        builder: (context, snapshot) {
+          if (snapshot.hasError) {
+            return Text("error ${snapshot.error}");
+          } else if (snapshot.connectionState == ConnectionState.waiting) {}
+          if (snapshot.hasData) {
+            return ListView(
+              children: snapshot.data!.docs.map((DocumentSnapshot document) {
+                Map<String, dynamic> data =
+                    document.data()! as Map<String, dynamic>;
+                return data['Id'] == cin
+                    ? SizedBox(
+                        height: MediaQuery.of(context).size.height / 6 + 10,
+                        child: ListView.separated(
+                            itemBuilder: (context, i) {
+                              return Card_Notification(
+                                description: 'test',
+                                time: data['Time'],
+                                title: data['Title'],
+                              );
+                            },
+                            separatorBuilder: (context, i) => const SizedBox(
+                                  height: 10,
+                                ),
+                            itemCount: 1),
+                      )
+                    : Container();
+              }).toList(),
+            );
+          }
+          return const Text("no data");
+        });
   }
 }
