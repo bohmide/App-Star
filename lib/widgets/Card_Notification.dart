@@ -1,10 +1,8 @@
-// ignore_for_file: file_names, camel_case_types
+// ignore_for_file: file_names, camel_case_types, non_constant_identifier_names, no_leading_underscores_for_local_identifiers
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-
-import 'button_widget.dart';
 
 class Card_Notification extends StatefulWidget {
   const Card_Notification(

@@ -1,5 +1,6 @@
 // ignore_for_file: file_names, non_constant_identifier_names, use_build_context_synchronously
 // ignore: library_prefixes
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:star/screens/Admin/Admin_HomePage.dart' as AdminHome;
 // ignore: library_prefixes
 import 'package:star/screens/Client/Client_HomePage.dart' as ClientHome;
@@ -8,6 +9,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:star/widgets/LoadingPage.dart';
+import '../../utils/Check_Connection.dart';
 import '../../utils/Scrolling_Notif.dart';
 import '../../widgets/button_widget.dart';
 import '../Forg_Pwd.dart';
@@ -55,10 +57,20 @@ class _LoginState extends State<Login> {
   Authentification_FirestoreService authFirestoreService =
       Authentification_FirestoreService();
 
+  bool _isConnected = false;
+
   @override
   void initState() {
     super.initState();
     initialization();
+    _checkConnection();
+  }
+
+  Future<void> _checkConnection() async {
+    bool isConnected = await ConnectionChecker.isConnected();
+    setState(() {
+      _isConnected = isConnected;
+    });
   }
 
   void initialization() async {
@@ -130,7 +142,16 @@ class _LoginState extends State<Login> {
                                                 ListTileControlAffinity.leading,
                                           )
                                         : _btnForgPwd(size)),
-                                _btnLoginRegister(size, context),
+                                StreamBuilder<bool>(
+                                  stream:
+                                      ConnectionChecker.connectivityStream(),
+                                  initialData: false,
+                                  builder: (context, snapshot) {
+                                    bool isConnected = snapshot.data ?? false;
+                                    return _btnLoginRegister(
+                                        size, context, isConnected);
+                                  },
+                                ),
                                 const SizedBox(
                                   height: 10,
                                 ),
@@ -373,7 +394,7 @@ class _LoginState extends State<Login> {
     );
   }
 
-  Widget _btnLoginRegister(size, context) {
+  Widget _btnLoginRegister(size, context, connection) {
     return AnimatedPadding(
       duration: const Duration(milliseconds: 500),
       padding: register
@@ -391,92 +412,95 @@ class _LoginState extends State<Login> {
         ],
         onPressed: () async {
           print('login');
-          if (register) {
-            //validation for register
-            if (_emailKey.currentState!.validate()) {
-              if (_addresskey.currentState!.validate()) {
-                if (_cinkey.currentState!.validate()) {
-                  if (_passwordKey.currentState!.validate()) {
-                    if (_confirmPasswordKey.currentState!.validate()) {
-                      if (checkedValue == false) {
-                        buildSnackError(
-                            'Accept our Privacy Policy and Term Of Use',
-                            context,
-                            size);
-                      } else {
-                        print('register');
-                        if (!await authFirestoreService
-                            .isUserExist(textfieldsStrings[0])) {
-                          authFirestoreService.createUser(
-                              textfieldsStrings[0],
-                              textfieldsStrings[5],
-                              textfieldsStrings[6],
-                              textfieldsStrings[2],
-                              textfieldsStrings[3],
-                              textfieldsStrings[1],
-                              textfieldsStrings[7]);
-                        } else if (await authFirestoreService
-                            .isUserExist(textfieldsStrings[0])) {
-                          buildSnackError('Cin deja existe', context, size);
-                          print("Cin deja existe");
+          if (connection) {
+            if (register) {
+              //validation for register
+              if (_emailKey.currentState!.validate()) {
+                if (_addresskey.currentState!.validate()) {
+                  if (_cinkey.currentState!.validate()) {
+                    if (_passwordKey.currentState!.validate()) {
+                      if (_confirmPasswordKey.currentState!.validate()) {
+                        if (checkedValue == false) {
+                          buildSnackError(
+                              'Accept our Privacy Policy and Term Of Use',
+                              context,
+                              size);
+                        } else {
+                          print('register');
+                          register = !register;
+                          if (!await authFirestoreService
+                              .isUserExist(textfieldsStrings[0])) {
+                            authFirestoreService.createUser(
+                                textfieldsStrings[0],
+                                textfieldsStrings[5],
+                                textfieldsStrings[6],
+                                textfieldsStrings[2],
+                                textfieldsStrings[3],
+                                textfieldsStrings[1],
+                                textfieldsStrings[7]);
+                          } else if (await authFirestoreService
+                              .isUserExist(textfieldsStrings[0])) {
+                            buildSnackError('Cin deja existe', context, size);
+                            print("Cin deja existe");
+                          }
                         }
                       }
                     }
                   }
                 }
               }
-            }
-          } else {
-            setState(() {
-              isLoading = true;
-            });
-            if (_cinkey.currentState!.validate()) {
-              if (_passwordKey.currentState!.validate()) {
-                setState(() {
-                  isLoading = true;
-                });
-                print('login');
-                if (await authFirestoreService.isUserValid(
-                    textfieldsStrings[0], textfieldsStrings[3])) {
-                  final userRole = await authFirestoreService
-                      .getUserRole(textfieldsStrings[0]);
-                  if (userRole == "S_User") {
-                    localStorage.saveUserId(textfieldsStrings[0]);
-                    print("Client");
-                    Navigator.pushReplacement(context,
-                        MaterialPageRoute(builder: (context) {
-                      return ChangeNotifierProvider(
-                        create: (_) => MyModel(),
-                        child: const ClientHome.HomePage(),
-                      );
-                    }));
-                  } else if (userRole == "E_User") {
-                    localStorage.saveUserId(textfieldsStrings[0]);
-                    print("Expert");
-                    Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) =>
-                                const Authentif_Expert_client()));
-                  } else if (userRole == "A_User") {
-                    localStorage.saveUserId(textfieldsStrings[0]);
-                    print("Admin");
-                    Navigator.pushReplacement(context,
-                        MaterialPageRoute(builder: (context) {
-                      return ChangeNotifierProvider(
-                        create: (_) => MyModel(),
-                        child: const AdminHome.HomePage(),
-                      );
-                    }));
-                  }
-                } else {
+            } else {
+              //validation for login
+              if (_cinkey.currentState!.validate()) {
+                if (_passwordKey.currentState!.validate()) {
                   setState(() {
-                    isLoading = false;
+                    isLoading = true;
                   });
-                  buildSnackError("Compte non valide", context, size);
+                  print('login');
+                  if (await authFirestoreService.isUserValid(
+                      textfieldsStrings[0], textfieldsStrings[3])) {
+                    final userRole = await authFirestoreService
+                        .getUserRole(textfieldsStrings[0]);
+                    if (userRole == "S_User") {
+                      localStorage.saveUserId(textfieldsStrings[0]);
+                      print("Client");
+                      Navigator.pushReplacement(context,
+                          MaterialPageRoute(builder: (context) {
+                        return ChangeNotifierProvider(
+                          create: (_) => MyModel(),
+                          child: const ClientHome.HomePage(),
+                        );
+                      }));
+                    } else if (userRole == "E_User") {
+                      localStorage.saveUserId(textfieldsStrings[0]);
+                      print("Expert");
+                      Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) =>
+                                  const Authentif_Expert_client()));
+                    } else if (userRole == "A_User") {
+                      localStorage.saveUserId(textfieldsStrings[0]);
+                      print("Admin");
+                      Navigator.pushReplacement(context,
+                          MaterialPageRoute(builder: (context) {
+                        return ChangeNotifierProvider(
+                          create: (_) => MyModel(),
+                          child: const AdminHome.HomePage(),
+                        );
+                      }));
+                    }
+                  } else {
+                    setState(() {
+                      isLoading = false;
+                      buildSnackError("Compte non valide", context, size);
+                    });
+                  }
                 }
               }
             }
+          } else {
+            buildSnackError("no connection", context, size);
           }
         },
       ),

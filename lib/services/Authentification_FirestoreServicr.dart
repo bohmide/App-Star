@@ -1,4 +1,4 @@
-// ignore_for_file: avoid_print, camel_case_types
+// ignore_for_file: avoid_print, camel_case_types, file_names
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../model/User.dart';

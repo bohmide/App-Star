@@ -49,8 +49,7 @@ dependencies:
   datepicker_dropdown: ^0.0.7+5
   intl: ^0.18.0
   cloud_firestore: ^4.8.3
-  #android_intent_plus: ^4.0.1
-  #geolocator: ^7.7.0
+  connectivity_plus: ^4.0.2
 
 
 

@@ -1,8 +1,7 @@
-// ignore_for_file: non_constant_identifier_names, file_names, unnecessary_import, avoid_print
+// ignore_for_file: non_constant_identifier_names, file_names, unnecessary_import, avoid_print, unused_element
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:star/utils/Local_Storage.dart';
 import 'package:star/widgets/Card_Notification.dart';
 
